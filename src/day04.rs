@@ -1,5 +1,6 @@
 // Advent 2020, Day 4
 
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 
@@ -38,22 +39,23 @@ pub fn part2(input: String) {
 }
 
 fn is_valid(key: &str, val: &str) -> bool {
-    let pid_re = Regex::new(r"^\d{9}$").unwrap();
-    let year_re = Regex::new(r"^\d{4}$").unwrap();
-    let hcl_re = Regex::new(r"^#[a-f0-9]{6}$").unwrap();
-    let hgt_re = Regex::new(r"^(\d+)(in|cm)$").unwrap();
-
+    lazy_static! {
+        static ref PID_RE: Regex = Regex::new(r"^\d{9}$").unwrap();
+        static ref YEAR_RE: Regex = Regex::new(r"^\d{4}$").unwrap();
+        static ref HCL_RE: Regex = Regex::new(r"^#[a-f0-9]{6}$").unwrap();
+        static ref HGT_RE: Regex = Regex::new(r"^(\d+)(in|cm)$").unwrap();
+    }
     match key {
-        "byr" => year_re.is_match(&val) && between(&val, 1920, 2002),
-        "iyr" => year_re.is_match(&val) && between(&val, 2010, 2020),
-        "eyr" => year_re.is_match(&val) && between(&val, 2020, 2030),
+        "byr" => YEAR_RE.is_match(&val) && between(&val, 1920, 2002),
+        "iyr" => YEAR_RE.is_match(&val) && between(&val, 2010, 2020),
+        "eyr" => YEAR_RE.is_match(&val) && between(&val, 2020, 2030),
         "hgt" => {
             let valid: bool;
 
-            if !hgt_re.is_match(&val) {
+            if !HGT_RE.is_match(&val) {
                 valid = false;
             } else {
-                let pair = hgt_re.captures(&val).unwrap();
+                let pair = HGT_RE.captures(&val).unwrap();
                 match &pair[2] {
                     "cm" => valid = between(&pair[1], 150, 193),
                     "in" => valid = between(&pair[1], 59, 76),
@@ -63,9 +65,9 @@ fn is_valid(key: &str, val: &str) -> bool {
 
             valid
         }
-        "hcl" => hcl_re.is_match(&val),
+        "hcl" => HCL_RE.is_match(&val),
         "ecl" => COLORS.iter().any(|v| v == &val),
-        "pid" => pid_re.is_match(&val),
+        "pid" => PID_RE.is_match(&val),
         "cid" => true,
         _ => panic!("unknown field"),
     }
